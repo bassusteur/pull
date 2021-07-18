@@ -1,18 +1,26 @@
 import os
-import paramiko
+import pysftp
+import datetime, threading, time
 
-while True:
-    server = input("enter hostname: ")
-    username = input("enter username: ")
-    password = input("enter password: ")
-    localpath = input("enter local path: ")
-    remotepath = input("enter remote path: ")
+next_call = time.time()
+
+server = input("enter hostname: ")
+username = input("enter username: ")
+password = input("enter password: ")
+localpath = input("enter local path: ")
+remotepath = input("enter remote path: ")
 
 
-    ssh = paramiko.SSHClient() 
-    ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-    ssh.connect(server, username=username, password=password)
-    sftp = ssh.open_sftp()
-    sftp.put(localpath, remotepath)
-    sftp.close()
-    ssh.close()
+
+def push():
+ with pysftp.Connection(server, username=username, password=password) as sftp:
+   with sftp.cd('public'):
+     sftp.put(localpath)
+
+
+def cycle():
+ global next_call
+ push()
+ next_call = next_call+3600
+
+cycle()
