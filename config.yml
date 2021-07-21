@@ -1,0 +1,7 @@
+main:
+  server: 
+  username: 
+  password: 
+  #i have setup some presets for remotepath such as: NOAA15 - NOAA18 - NOAA19 - METEOR-M2 - ALL  
+  remotepath: ALL
+  localpath: 

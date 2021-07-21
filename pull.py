@@ -1,26 +1,36 @@
-import os
 import pysftp
-import datetime, threading, time
+import yaml
 
-next_call = time.time()
+config = "config.yml"
 
-server = input("enter hostname: ")
-username = input("enter username: ")
-password = input("enter password: ")
-localpath = input("enter local path: ")
-remotepath = input("enter remote path: ")
+with open(config, "r") as ymlfile:
+    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+for section in cfg:
+ server = cfg["main"]["server"]
+ username = cfg["main"]["username"]
+ password = cfg["main"]["password"]
+ remotepath = cfg["main"]["remotepath"]
+ localpath = cfg["main"]["localpath"]
+ print("Loaded config ---> "+config) 
+ print("Loaded server ---> "+server)
+ print("Loaded username ---> "+username)
+ print("Loaded remotepath ---> "+remotepath)
+ print("Loaded save path ---> "+localpath) 
 
 
+ sftp = pysftp.Connection(server, username=username, password=password)
+ if remotepath == "NOAA18":
+   sftp.get_r("/home/pi/AltiWx/data/NOAA-18/", localpath, preserve_mtime=True)
+ elif remotepath == "NOAA15":
+   sftp.get_r("/home/pi/AltiWx/data/NOAA-15/", localpath, preserve_mtime=True)
+ elif remotepath == "METEOR-M2":
+   sftp.get_r("/home/pi/AltiWx/data/METEOR-M2/", localpath, preserve_mtime=True)
+ elif remotepath == "NOAA19":
+   sftp.get_r("/home/pi/AltiWx/data/NOAA-19/", localpath, preserve_mtime=True)
+ elif remotepath == "ALL":
+   sftp.get_r("/home/pi/AltiWx/data/", localpath , preserve_mtime=True)
+ elif remotepath == "userinput":
+   userinput = remotepath
+   sftp.get_r(userinput, localpath, preserve_mtime=True)
 
-def push():
- with pysftp.Connection(server, username=username, password=password) as sftp:
-   with sftp.cd('public'):
-     sftp.put(localpath)
-
-
-def cycle():
- global next_call
- push()
- next_call = next_call+3600
-
-cycle()
